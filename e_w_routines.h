@@ -4,24 +4,24 @@
 typedef struct {
 	int device_size;
 	char bl_version;
-	int *bytes
-	char **data;
+	int *bytes;
+	unsigned char *data;
 } E_W_ROUTINES;
 
 extern int e_w_routine_32k_1_0_size;
-extern char e_w_routine_32k_1_0_data[];
+extern unsigned char e_w_routine_32k_1_0_data[];
 extern int e_w_routine_32k_1_2_size;
-extern char e_w_routine_32k_1_2_data[];
+extern unsigned char e_w_routine_32k_1_2_data[];
 extern int e_w_routine_32k_1_3_size;
-extern char e_w_routine_32k_1_3_data[];
+extern unsigned char e_w_routine_32k_1_3_data[];
 extern int e_w_routine_128k_2_0_size;
-extern char e_w_routine_128k_2_0_data[];
+extern unsigned char e_w_routine_128k_2_0_data[];
 extern int e_w_routine_128k_2_1_size;
-extern char e_w_routine_128k_2_1_data[];
+extern unsigned char e_w_routine_128k_2_1_data[];
 extern int e_w_routine_128k_2_2_size;
-extern char e_w_routine_128k_2_2_data[];
+extern unsigned char e_w_routine_128k_2_2_data[];
 extern int e_w_routine_256k_1_0_size;
-extern char e_w_routine_256k_1_0_data[];
+extern unsigned char e_w_routine_256k_1_0_data[];
 
 extern E_W_ROUTINES e_w_routines[];
 

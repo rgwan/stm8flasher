@@ -23,6 +23,7 @@
 
 #include "stm8.h"
 #include "utils.h"
+#include "e_w_routines.h"
 
 #define STM8_ACK	0x79
 #define STM8_NACK	0x1F
@@ -97,6 +98,8 @@ char stm8_send_command(const stm8_t *stm, const uint8_t cmd) {
 stm8_t* stm8_init(const serial_t *serial, const char init) {
 	uint8_t len;
 	stm8_t *stm;
+	int routine_len;
+	int routine_offset;
 
 	stm      = calloc(sizeof(stm8_t), 1);
 	stm->cmd = calloc(sizeof(stm8_cmd_t), 1);
@@ -134,15 +137,23 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	//FIX ME: Points to first device in List
 	stm->dev = devices; 
 
+	routine_len = e_w_routine_32k_1_2_size;
+	routine_offset = 0x0;
 
-	if (!stm8_write_memory(stm, 0xA0, e_w_routine_32k_1_3_data,128)
-		return 0;
-
-	if (!stm8_write_memory(stm, 0xA0+128, &e_w_routine_32k_1_3_data[128],128)
-		return 0;
-
-	if (!stm8_write_memory(stm, 0xA0+256, &e_w_routine_32k_1_3_data[256],304-256)
-		return 0;
+	while(routine_len)
+	{
+		if(routine_len > 128)
+		{
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,e_w_routine_32k_1_2_data,128))
+				return 0;
+			routine_len-=128;
+			routine_offset+=128;
+		} else {
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,e_w_routine_32k_1_2_data,routine_len))
+				return 0;
+			routine_len=0;
+		}
+	}
 
 	return stm;
 }
@@ -270,7 +281,7 @@ char stm8_reset_device(const stm8_t *stm) {
 		upload the stmreset program into ram and run it, which
 		resets the device for us
 	*/
-
+/* FIXME!!!!
 	uint32_t length		= stmreset_length;
 	unsigned char* pos	= stmreset_binary;
 	uint32_t address	= stm->dev->ram_start;
@@ -285,5 +296,8 @@ char stm8_reset_device(const stm8_t *stm) {
 	}
 
 	return stm8_go(stm, stm->dev->ram_start);
+*/
+	return 1;
+
 }
 

@@ -29,7 +29,7 @@
 
 #include "utils.h"
 #include "serial.h"
-#include "stm32.h"
+#include "stm8.h"
 #include "parser.h"
 
 #include "parsers/binary.h"
@@ -37,7 +37,7 @@
 
 /* device globals */
 serial_t	*serial		= NULL;
-stm32_t		*stm		= NULL;
+stm8_t		*stm		= NULL;
 
 void		*p_st		= NULL;
 parser_t	*parser		= NULL;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 	int ret = 1;
 	parser_err_t perr;
 
-	printf("stm32flash - http://stm32flash.googlecode.com/\n\n");
+	printf("stm8flash based on stm32flash - http://stm32flash.googlecode.com/\n\n");
 	if (parse_options(argc, argv) != 0)
 		goto close;
 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	printf("Serial Config: %s\n", serial_get_setup_str(serial));
-	if (!(stm = stm32_init(serial, init_flag))) goto close;
+	if (!(stm = stm8_init(serial, init_flag))) goto close;
 
 	printf("Version      : 0x%02x\n", stm->bl_version);
 	printf("Option 1     : 0x%02x\n", stm->option1);
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
 		while(addr < stm->dev->fl_end) {
 			uint32_t left	= stm->dev->fl_end - addr;
 			len		= sizeof(buffer) > left ? left : sizeof(buffer);
-			if (!stm32_read_memory(stm, addr, buffer, len)) {
+			if (!stm8_read_memory(stm, addr, buffer, len)) {
 				fprintf(stderr, "Failed to read memory at address 0x%08x, target write-protected?\n", addr);
 				goto close;
 			}
@@ -184,11 +184,14 @@ int main(int argc, char* argv[]) {
 		goto close;
 
 	} else if (wu) {
-		fprintf(stdout, "Write-unprotecting flash\n");
+
+//FIXME: Write-unprotecting on STM8 ????
+//		fprintf(stdout, "Write-unprotecting flash\n");
 		/* the device automatically performs a reset after the sending the ACK */
-		reset_flag = 0;
-		stm32_wunprot_memory(stm);
-		fprintf(stdout,	"Done.\n");
+//		reset_flag = 0;
+//		stm8_wunprot_memory(stm);
+//		fprintf(stdout,	"Done.\n");
+//FIXME: END
 
 	} else if (wr) {
 		printf("\n");
@@ -202,7 +205,7 @@ int main(int argc, char* argv[]) {
 			goto close;
 		}
 
-		stm32_erase_memory(stm, npages);
+		stm8_erase_memory(stm, npages);
 
 		addr = stm->dev->fl_start;
 		fprintf(stdout, "\x1B[s");
@@ -216,14 +219,14 @@ int main(int argc, char* argv[]) {
 				goto close;
 	
 			again:
-			if (!stm32_write_memory(stm, addr, buffer, len)) {
+			if (!stm8_write_memory(stm, addr, buffer, len)) {
 				fprintf(stderr, "Failed to write memory at address 0x%08x\n", addr);
 				goto close;
 			}
 
 			if (verify) {
 				uint8_t compare[len];
-				if (!stm32_read_memory(stm, addr, compare, len)) {
+				if (!stm8_read_memory(stm, addr, compare, len)) {
 					fprintf(stderr, "Failed to read memory at address 0x%08x\n", addr);
 					goto close;
 				}
@@ -271,7 +274,7 @@ close:
 
 		fprintf(stdout, "\nStarting execution at address 0x%08x... ", execute);
 		fflush(stdout);
-		if (stm32_go(stm, execute)) {
+		if (stm8_go(stm, execute)) {
 			reset_flag = 0;
 			fprintf(stdout, "done.\n");
 		} else
@@ -281,13 +284,13 @@ close:
 	if (stm && reset_flag) {
 		fprintf(stdout, "\nResetting device... ");
 		fflush(stdout);
-		if (stm32_reset_device(stm))
+		if (stm8_reset_device(stm))
 			fprintf(stdout, "done.\n");
 		else	fprintf(stdout, "failed.\n");
 	}
 
 	if (p_st  ) parser->close(p_st);
-	if (stm   ) stm32_close  (stm);
+	if (stm   ) stm8_close  (stm);
 	if (serial) serial_close (serial);
 
 	printf("\n");

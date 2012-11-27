@@ -5,19 +5,18 @@ export AR
 
 all:
 	$(MAKE) -C parsers
-	$(CC) -g -o stm32flash -I./ \
+	$(CC) -g -o stm8flash -I./ \
 		main.c \
 		utils.c \
-		stm32.c \
+		stm8.c \
+		e_w_routines.c \
 		serial_common.c \
 		serial_platform.c \
 		parsers/parsers.a \
-		stm32/stmreset_binary.c \
 		-Wall
 
 clean:
 	$(MAKE) -C parsers clean
 	rm -f stm32flash
 
-install: all
-	cp stm32flash /usr/local/bin
+
