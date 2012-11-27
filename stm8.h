@@ -1,6 +1,7 @@
 /*
   stm8flash - Open Source ST STM8 flash program for *nix
   Copyright (C) 2010 Geoffrey McRae <geoff@spacevs.com>
+  adapted for STM8 - by Georg Ottinger <g.ottinger@gmx.at>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License

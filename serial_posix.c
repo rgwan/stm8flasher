@@ -1,6 +1,7 @@
 /*
   stm32flash - Open Source ST STM32 flash program for *nix
   Copyright (C) 2010 Geoffrey McRae <geoff@spacevs.com>
+  added DTR-Line Reset - by Georg Ottinger <g.ottinger@gmx.at>
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
