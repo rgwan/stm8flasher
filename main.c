@@ -48,6 +48,7 @@ serial_baud_t	baudRate	= SERIAL_BAUD_57600;
 int		rd	 	= 0;
 int		wr		= 0;
 int		wu		= 0;
+int		dtr_reset	= 0;
 int		npages		= 0xFF;
 char		verify		= 0;
 int		retry		= 10;
@@ -126,26 +127,39 @@ int main(int argc, char* argv[]) {
 		serial,
 		baudRate,
 		SERIAL_BITS_8,
-		SERIAL_PARITY_EVEN,
+//		SERIAL_PARITY_EVEN,
+// REPLY-MODE
+		SERIAL_PARITY_NONE,
 		SERIAL_STOPBIT_1
 	) != SERIAL_ERR_OK) {
 		perror(device);
 		goto close;
 	}
 
+
+	if(dtr_reset)
+	{
+		serial_dtr_reset(serial);
+		usleep(10000); //FIXME
+	}
+
+
+
 	printf("Serial Config: %s\n", serial_get_setup_str(serial));
 	if (!(stm = stm8_init(serial, init_flag))) goto close;
 
-	printf("Version      : 0x%02x\n", stm->bl_version);
-	printf("Option 1     : 0x%02x\n", stm->option1);
+	printf("BL-Version   : 0x%02x\n", stm->bl_version);
+/*	printf("Option 1     : 0x%02x\n", stm->option1);
 	printf("Option 2     : 0x%02x\n", stm->option2);
 	printf("Device ID    : 0x%04x (%s)\n", stm->pid, stm->dev->name);
 	printf("RAM          : %dKiB  (%db reserved by bootloader)\n", (stm->dev->ram_end - 0x20000000) / 1024, stm->dev->ram_start - 0x20000000);
 	printf("Flash        : %dKiB (sector size: %dx%d)\n", (stm->dev->fl_end - stm->dev->fl_start ) / 1024, stm->dev->fl_pps, stm->dev->fl_ps);
 	printf("Option RAM   : %db\n", stm->dev->opt_end - stm->dev->opt_start);
 	printf("System RAM   : %dKiB\n", (stm->dev->mem_end - stm->dev->mem_start) / 1024);
+*/
 
 	uint8_t		buffer[256];
+	uint8_t		wbuffer[128];
 	uint32_t	addr;
 	unsigned int	len;
 	int		failed = 0;
@@ -212,14 +226,14 @@ int main(int argc, char* argv[]) {
 		fflush(stdout);
 		while(addr < stm->dev->fl_end && offset < size) {
 			uint32_t left	= stm->dev->fl_end - addr;
-			len		= sizeof(buffer) > left ? left : sizeof(buffer);
+			len		= sizeof(wbuffer) > left ? left : sizeof(wbuffer);
 			len		= len > size - offset ? size - offset : len;
 
-			if (parser->read(p_st, buffer, &len) != PARSER_ERR_OK)
+			if (parser->read(p_st, wbuffer, &len) != PARSER_ERR_OK)
 				goto close;
 	
 			again:
-			if (!stm8_write_memory(stm, addr, buffer, len)) {
+			if (!stm8_write_memory(stm, addr, wbuffer, len)) {
 				fprintf(stderr, "Failed to write memory at address 0x%08x\n", addr);
 				goto close;
 			}
@@ -232,11 +246,11 @@ int main(int argc, char* argv[]) {
 				}
 
 				for(r = 0; r < len; ++r)
-					if (buffer[r] != compare[r]) {
+					if (wbuffer[r] != compare[r]) {
 						if (failed == retry) {
 							fprintf(stderr, "Failed to verify at address 0x%08x, expected 0x%02x and found 0x%02x\n",
 								(uint32_t)(addr + r),
-								buffer [r],
+								wbuffer [r],
 								compare[r]
 							);
 							goto close;
@@ -284,9 +298,15 @@ close:
 	if (stm && reset_flag) {
 		fprintf(stdout, "\nResetting device... ");
 		fflush(stdout);
-		if (stm8_reset_device(stm))
-			fprintf(stdout, "done.\n");
-		else	fprintf(stdout, "failed.\n");
+		if(dtr_reset)
+		{
+			serial_dtr_reset(serial);
+			usleep(10000); //FIXME			
+		} else {		
+			if (stm8_reset_device(stm))
+				fprintf(stdout, "done.\n");
+			else	fprintf(stdout, "failed.\n");
+		}
 	}
 
 	if (p_st  ) parser->close(p_st);
@@ -299,7 +319,7 @@ close:
 
 int parse_options(int argc, char *argv[]) {
 	int c;
-	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchu")) != -1) {
+	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchud")) != -1) {
 		switch(c) {
 			case 'b':
 				baudRate = serial_get_baud(strtoul(optarg, NULL, 0));
@@ -310,7 +330,6 @@ int parse_options(int argc, char *argv[]) {
 					return 1;
 				}
 				break;
-
 			case 'r':
 			case 'w':
 				rd = rd || c == 'r';
@@ -354,6 +373,9 @@ int parse_options(int argc, char *argv[]) {
 
 			case 'c':
 				init_flag = 0;
+				break;
+			case 'd':
+				dtr_reset = 1;
 				break;
 
 			case 'h':

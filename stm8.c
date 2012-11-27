@@ -80,6 +80,8 @@ uint8_t stm8_read_byte(const stm8_t *stm) {
 		perror("read_byte");
 		assert(0);
 	}
+	//REPLY-MODE
+	stm8_send_byte(stm, byte);
 	return byte;
 }
 
@@ -144,12 +146,12 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	{
 		if(routine_len > 128)
 		{
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,e_w_routine_32k_1_2_data,128))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&e_w_routine_32k_1_2_data[routine_offset],128))
 				return 0;
 			routine_len-=128;
 			routine_offset+=128;
 		} else {
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,e_w_routine_32k_1_2_data,routine_len))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&e_w_routine_32k_1_2_data[routine_offset],routine_len))
 				return 0;
 			routine_len=0;
 		}
@@ -169,7 +171,7 @@ char stm8_read_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsig
 	assert(len > 0 && len < 257);
 
 	/* must be 32bit aligned */
-	assert(address % 4 == 0);
+	//assert(address % 4 == 0);
 
 	address = be_u32      (address);
 	cs      = stm8_gen_cs(address);
@@ -191,12 +193,13 @@ char stm8_read_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsig
 char stm8_write_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsigned int len) {
 	uint8_t cs;
 	unsigned int i;
-	int c, extra;
+//	int c;
+//	int extra;
 	char ack;
 	assert(len > 0 && len < 129);
 
-	/* must be 32bit aligned */
-	assert(address % 4 == 0);
+//	/* must be 32bit aligned */
+//	assert(address % 4 == 0);
 
 	address = be_u32      (address);
 	cs      = stm8_gen_cs(address);
@@ -212,8 +215,9 @@ char stm8_write_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsi
 	if (ack != STM8_ACK) return 0;
 
 	/* setup the cs and send the length */
-	extra = len % 4;
-	cs = len - 1 + extra;
+//	extra = len % 4;
+//	cs = len - 1 + extra;
+	cs = len - 1;
 	stm8_send_byte(stm, cs);
 
 	/* write the data and build the checksum */
@@ -223,10 +227,11 @@ char stm8_write_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsi
 	assert(serial_write(stm->serial, data, len) == SERIAL_ERR_OK);
 
 	/* write the alignment padding */
-	for(c = 0; c < extra; ++c) {
+/*	for(c = 0; c < extra; ++c) {
 		stm8_send_byte(stm, 0xFF);
 		cs ^= 0xFF;
 	}
+*/
 
 	/* send the checksum */
 	stm8_send_byte(stm, cs);

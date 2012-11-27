@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 
+
 typedef struct serial serial_t;
 
 typedef enum {
@@ -71,6 +72,7 @@ typedef enum {
 
 serial_t*    serial_open (const char *device);
 void         serial_close(serial_t *h);
+void	     serial_dtr_reset(serial_t *h);
 void         serial_flush(const serial_t *h);
 serial_err_t serial_setup(serial_t *h, const serial_baud_t baud, const serial_bits_t bits, const serial_parity_t parity, const serial_stopbit_t stopbit);
 serial_err_t serial_write(const serial_t *h, const void *buffer, unsigned int len);

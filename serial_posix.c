@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include <sys/ioctl.h>
+
 #include "serial.h"
 
 struct serial {
@@ -67,6 +69,19 @@ void serial_close(serial_t *h) {
 void serial_flush(const serial_t *h) {
 	assert(h && h->fd > -1);
 	tcflush(h->fd, TCIFLUSH);
+}
+
+void serial_dtr_reset(serial_t *h) {
+	int status;
+
+	ioctl(h->fd, TIOCMGET, &status);
+	status &= ~TIOCM_DTR;
+	ioctl(h->fd, TIOCMSET, &status);	
+	usleep(5000);
+	status |= TIOCM_DTR;
+	ioctl(h->fd, TIOCMSET, &status);	
+
+
 }
 
 serial_err_t serial_setup(serial_t *h, const serial_baud_t baud, const serial_bits_t bits, const serial_parity_t parity, const serial_stopbit_t stopbit) {

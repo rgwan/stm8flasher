@@ -163,13 +163,13 @@ unsigned char e_w_routine_256k_1_0_data[] = {
 };
 
 E_W_ROUTINES e_w_routines[] = {
-	{ 32, 10, &e_w_routine_32k_1_0_size, e_w_routine_32k_1_0_data },
-	{ 32, 12, &e_w_routine_32k_1_2_size, e_w_routine_32k_1_2_data },
-	{ 32, 13, &e_w_routine_32k_1_3_size, e_w_routine_32k_1_3_data },
-	{ 128, 20, &e_w_routine_128k_2_0_size, e_w_routine_128k_2_0_data },
-	{ 128, 21, &e_w_routine_128k_2_1_size, e_w_routine_128k_2_1_data },
-	{ 128, 22, &e_w_routine_128k_2_2_size, e_w_routine_128k_2_2_data },
-	{ 256, 10, &e_w_routine_256k_1_0_size, e_w_routine_256k_1_0_data }
+	{ 32, 0x10, &e_w_routine_32k_1_0_size, e_w_routine_32k_1_0_data },
+	{ 32, 0x12, &e_w_routine_32k_1_2_size, e_w_routine_32k_1_2_data },
+	{ 32, 0x13, &e_w_routine_32k_1_3_size, e_w_routine_32k_1_3_data },
+	{ 128, 0x20, &e_w_routine_128k_2_0_size, e_w_routine_128k_2_0_data },
+	{ 128, 0x21, &e_w_routine_128k_2_1_size, e_w_routine_128k_2_1_data },
+	{ 128, 0x22, &e_w_routine_128k_2_2_size, e_w_routine_128k_2_2_data },
+//	{ 256, 0x10, &e_w_routine_256k_1_0_size, e_w_routine_256k_1_0_data }
 };
 
 
