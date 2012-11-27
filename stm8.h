@@ -56,6 +56,8 @@ char stm8_write_memory  (const stm8_t *stm, uint32_t address, uint8_t data[], un
 char stm8_erase_memory  (const stm8_t *stm, uint8_t pages);
 char stm8_go            (const stm8_t *stm, uint32_t address);
 char stm8_reset_device  (const stm8_t *stm);
+uint8_t *stm8_get_e_w_routine(int *len, char bl_version);
+
 
 #endif
 

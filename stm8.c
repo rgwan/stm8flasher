@@ -97,11 +97,29 @@ char stm8_send_command(const stm8_t *stm, const uint8_t cmd) {
 
 
 
+uint8_t *stm8_get_e_w_routine(int *len, char bl_version)
+{
+	int i;
+
+	for(i = 0; i < E_W_ROUTINES_NUM ;i++)
+	{
+		if(e_w_routines[i].bl_version == bl_version)
+		{
+			*len = *(e_w_routines[i].bytes);
+			return e_w_routines[i].data;
+		}
+	}
+
+	return NULL;	
+}
+	
+
 stm8_t* stm8_init(const serial_t *serial, const char init) {
 	uint8_t len;
 	stm8_t *stm;
 	int routine_len;
 	int routine_offset;
+	uint8_t *routine_data;
 
 	stm      = calloc(sizeof(stm8_t), 1);
 	stm->cmd = calloc(sizeof(stm8_cmd_t), 1);
@@ -139,7 +157,14 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	//FIX ME: Points to first device in List
 	stm->dev = devices; 
 
-	routine_len = e_w_routine_32k_1_2_size;
+	routine_data = stm8_get_e_w_routine(&routine_len,stm->bl_version);
+
+	if(!routine_data)
+	{
+		fprintf(stderr, "Erase and Write Routines for Bootloader-Version not found!\n");
+		return NULL;	
+	}
+
 	routine_offset = 0x0;
 
 	while(routine_len)
@@ -286,7 +311,10 @@ char stm8_reset_device(const stm8_t *stm) {
 		upload the stmreset program into ram and run it, which
 		resets the device for us
 	*/
-/* FIXME!!!!
+
+//For now we stick with DTR Reset
+
+/* 
 	uint32_t length		= stmreset_length;
 	unsigned char* pos	= stmreset_binary;
 	uint32_t address	= stm->dev->ram_start;
