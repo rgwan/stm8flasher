@@ -421,6 +421,7 @@ void show_help(char *name) {
 		"	-g address	Start execution at specified address (0 = flash start)\n"
 		"	-f		Force binary parser\n"
 		"	-h		Show this help\n"
+		"	-d		Use DTR-Line for Reset (Arduino-Style ;) )\n"
 		"	-c		Resume the connection (don't send initial INIT)\n"
 		"			*Baud rate must be kept the same as the first init*\n"
 		"			This is useful if the reset fails\n"
