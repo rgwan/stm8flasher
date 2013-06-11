@@ -67,6 +67,19 @@ char		*filename;
 int  parse_options(int argc, char *argv[]);
 void show_help(char *name);
 
+int isMemZero(uint8_t *data, int len)
+{
+	if(len <= 0) return 0;
+
+	do {
+		len--;
+		if(data[len]) return 0;
+	} while(len);
+	
+	return 1;
+}
+		
+
 int main(int argc, char* argv[]) {
 	int ret = 1;
 	parser_err_t perr;
@@ -251,11 +264,13 @@ int main(int argc, char* argv[]) {
 				goto close;
 	
 			again:
-			if (!stm8_write_memory(stm, addr, wbuffer, len)) {
-				fprintf(stderr, "Failed to write memory at address 0x%08x\n", addr);
-				goto close;
+			if(!isMemZero(wbuffer,len))
+			{
+				if (!stm8_write_memory(stm, addr, wbuffer, len)) {
+					fprintf(stderr, "Failed to write memory at address 0x%08x\n", addr);
+					goto close;
+				}
 			}
-
 			if (verify) {
 				uint8_t compare[len];
 				if (!stm8_read_memory(stm, addr, compare, len)) {
