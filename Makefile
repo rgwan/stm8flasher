@@ -17,6 +17,6 @@ all:
 
 clean:
 	$(MAKE) -C parsers clean
-	rm -f stm32flash
-
+	rm -f stm8flash
+	rm -f stm8flash.gdb
 
