@@ -49,6 +49,7 @@ serial_baud_t	baudRate	= SERIAL_BAUD_57600;
 int		rd	 	= 0;
 int		wr		= 0;
 int		wu		= 0;
+int 		eb 		= 0;
 int		dtr_reset	= 0;
 int		cpm_reset_flag	= 0;
 
@@ -212,6 +213,13 @@ int main(int argc, char* argv[]) {
 //		stm8_wunprot_memory(stm);
 //		fprintf(stdout,	"Done.\n");
 //FIXME: END
+	} else if (eb) {
+
+		addr = 0x487E; //OPTBL
+		if (!stm8_write_memory(stm, addr, (uint8_t *)"\x55\xAA", 2)) {
+			fprintf(stderr, "Failed to OPTION Bytes memory at address 0x%08x\n", addr);
+			goto close;
+		}
 
 	} else if (wr) {
 		printf("\n");
@@ -332,7 +340,7 @@ close:
 
 int parse_options(int argc, char *argv[]) {
 	int c;
-	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchuds")) != -1) {
+	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchudsl")) != -1) {
 		switch(c) {
 			case 'b':
 				baudRate = serial_get_baud(strtoul(optarg, NULL, 0));
@@ -345,10 +353,12 @@ int parse_options(int argc, char *argv[]) {
 				break;
 			case 'r':
 			case 'w':
+			case 'l':
 				rd = rd || c == 'r';
 				wr = wr || c == 'w';
-				if (rd && wr) {
-					fprintf(stderr, "ERROR: Invalid options, can't read & write at the same time\n");
+				eb = eb || c == 'l';
+				if ((rd && wr) || (rd && eb) || (wr && eb) ) {
+					fprintf(stderr, "ERROR: Invalid options, can't read & write or enable bootloader at the same time\n");
 					return 1;
 				}
 				filename = optarg;
@@ -430,6 +440,7 @@ void show_help(char *name) {
 		"	-b rate		Baud rate (default 57600)\n"
 		"	-r filename	Read flash to file\n"
 		"	-w filename	Write flash to file\n"
+		"	-l		Enable STM8 Bootloader\n"
 		"	-u		Disable the flash write-protection\n"
 		"	-e n		Only erase n pages before writing the flash\n"
 		"	-v		Verify writes\n"
@@ -438,7 +449,7 @@ void show_help(char *name) {
 		"	-f		Force binary parser\n"
 		"	-h		Show this help\n"
 		"	-d		Use DTR-Line for Reset (Arduino-Style ;) )\n"
-	   "	-s		Lantronix CPM STM8 Reset\n"
+		   "	-s		OggStreamer/Lantronix XportPRO CPM STM8 Reset\n"
 		"	-c		Resume the connection (don't send initial INIT)\n"
 		"			*Baud rate must be kept the same as the first init*\n"
 		"			This is useful if the reset fails\n"
