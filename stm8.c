@@ -233,7 +233,10 @@ char stm8_read_memory(const stm8_t *stm, uint32_t address, uint8_t data[], unsig
 	stm8_send_byte(stm, i ^ 0xFF);
 	if (stm8_read_byte(stm) != STM8_ACK) return 0;
 
-	assert(serial_read(stm->serial, data, len) == SERIAL_ERR_OK);
+	i=0;
+	while(len--) data[i++] = stm8_read_byte(stm);
+
+//	assert(serial_read(stm->serial, data, len) == SERIAL_ERR_OK);
 	return 1;
 }
 

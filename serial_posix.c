@@ -27,6 +27,7 @@
 #include <assert.h>
 
 #include <sys/ioctl.h>
+#include <linux/serial.h>
 
 #include "serial.h"
 
@@ -54,6 +55,7 @@ serial_t* serial_open(const char *device) {
 
 	tcgetattr(h->fd, &h->oldtio);
 	tcgetattr(h->fd, &h->newtio);
+
 
 	return h;
 }
@@ -92,6 +94,8 @@ void cpm_reset()
 
 
 serial_err_t serial_setup(serial_t *h, const serial_baud_t baud, const serial_bits_t bits, const serial_parity_t parity, const serial_stopbit_t stopbit) {
+	struct serial_struct serinfo;
+
 	assert(h && h->fd > -1);
 
 	speed_t		port_baud;
@@ -175,6 +179,11 @@ serial_err_t serial_setup(serial_t *h, const serial_baud_t baud, const serial_bi
 	serial_flush(h);
 	if (tcsetattr(h->fd, TCSANOW, &h->newtio) != 0)
 		return SERIAL_ERR_SYSTEM;
+
+
+	ioctl (h->fd, TIOCGSERIAL, &serinfo);
+	serinfo.flags |= ASYNC_LOW_LATENCY;
+	ioctl (h->fd, TIOCSSERIAL, &serinfo);
 
 	/* confirm they were set */
 	struct termios settings;
