@@ -45,7 +45,7 @@ parser_t	*parser		= NULL;
 
 /* settings */
 char		*device		= NULL;
-serial_baud_t	baudRate	= SERIAL_BAUD_57600;
+serial_baud_t	baudRate	= SERIAL_BAUD_115200;
 int		rd	 	= 0;
 int		wr		= 0;
 int		wu		= 0;
