@@ -440,7 +440,7 @@ void show_help(char *name) {
 		"	-b rate		Baud rate (default 57600)\n"
 		"	-r filename	Read flash to file\n"
 		"	-w filename	Write flash to file\n"
-		"	-l		Enable STM8 Bootloader\n"
+		"	-l		Enable STM8 Bootloader OPTION-Bytes\n"
 		"	-u		Disable the flash write-protection\n"
 		"	-e n		Only erase n pages before writing the flash\n"
 		"	-v		Verify writes\n"
