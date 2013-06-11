@@ -193,12 +193,12 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	{
 		if(routine_len > 128)
 		{
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,routine_data,128))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&routine_data[routine_offset],128))
 				return 0;
 			routine_len-=128;
 			routine_offset+=128;
 		} else {
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,routine_data,routine_len))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&routine_data[routine_offset],routine_len))
 				return 0;
 			routine_len=0;
 		}
