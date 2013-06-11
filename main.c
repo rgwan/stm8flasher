@@ -50,6 +50,8 @@ int		rd	 	= 0;
 int		wr		= 0;
 int		wu		= 0;
 int		dtr_reset	= 0;
+int		cpm_reset_flag	= 0;
+
 int		npages		= 0xFF;
 char		verify		= 0;
 int		retry		= 10;
@@ -144,7 +146,10 @@ int main(int argc, char* argv[]) {
 		usleep(10000); //FIXME
 	}
 
-
+	if(cpm_reset_flag)
+	{
+		cpm_reset();
+	}
 
 	printf("Serial Config: %s\n", serial_get_setup_str(serial));
 	if (!(stm = stm8_init(serial, init_flag))) goto close;
@@ -215,7 +220,11 @@ int main(int argc, char* argv[]) {
 		ssize_t r;
 		unsigned int size = parser->size(p_st);
 
+		//FIXME
+		//size -= 0x8000;
+
 		if (size > stm->dev->fl_end - stm->dev->fl_start) {
+			fprintf(stderr,"Size: %d Flash-Start: %x Flash-End: %x\n", size, stm->dev->fl_start, stm->dev->fl_end);
 			fprintf(stderr, "File provided larger then available flash space.\n");
 			goto close;
 		}
@@ -302,7 +311,10 @@ close:
 		if(dtr_reset)
 		{
 			serial_dtr_reset(serial);
-			usleep(10000); //FIXME			
+			usleep(10000); //FIXME	
+		} else if (cpm_reset_flag) {
+			cpm_reset();
+			usleep(10000);		
 		} else {		
 			if (stm8_reset_device(stm))
 				fprintf(stdout, "done.\n");
@@ -320,7 +332,7 @@ close:
 
 int parse_options(int argc, char *argv[]) {
 	int c;
-	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchud")) != -1) {
+	while((c = getopt(argc, argv, "b:r:w:e:vn:g:fchuds")) != -1) {
 		switch(c) {
 			case 'b':
 				baudRate = serial_get_baud(strtoul(optarg, NULL, 0));
@@ -378,6 +390,9 @@ int parse_options(int argc, char *argv[]) {
 			case 'd':
 				dtr_reset = 1;
 				break;
+			case 's':
+				cpm_reset_flag = 1;
+				break;
 
 			case 'h':
 				show_help(argv[0]);
@@ -423,6 +438,7 @@ void show_help(char *name) {
 		"	-f		Force binary parser\n"
 		"	-h		Show this help\n"
 		"	-d		Use DTR-Line for Reset (Arduino-Style ;) )\n"
+	   "	-s		Lantronix CPM STM8 Reset\n"
 		"	-c		Resume the connection (don't send initial INIT)\n"
 		"			*Baud rate must be kept the same as the first init*\n"
 		"			This is useful if the reset fails\n"

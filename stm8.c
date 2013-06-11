@@ -44,6 +44,7 @@ struct stm8_cmd {
 /* device table */
 const stm8_dev_t devices[] = {
 	{0x012, "Medium density STM8S 32kB", 0x000000, 0x0007FF, 0x008000, 0x00FFFF, 1, 512, 0x004800, 0x00487F, 0x004000, 0x0043FF},
+	{0x013, "Medium density STM8S 32kB", 0x000000, 0x0007FF, 0x008000, 0x00FFFF, 1, 512, 0x004800, 0x00487F, 0x004000, 0x0043FF},
 	{0x0}
 };
 
@@ -97,6 +98,20 @@ char stm8_send_command(const stm8_t *stm, const uint8_t cmd) {
 }
 
 
+struct stm8_dev *stm8_get_device(char bl_version)
+{
+	int i=0;
+
+	do {
+		if(devices[i].id == bl_version)
+		{
+			
+			return (struct stm8_dev*)&(devices[i]);
+		}
+	} while(devices[++i].id);
+
+	return NULL;
+}
 
 uint8_t *stm8_get_e_w_routine(int *len, char bl_version)
 {
@@ -156,7 +171,13 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 
 
 	//FIX ME: Points to first device in List
-	stm->dev = devices; 
+	stm->dev = stm8_get_device(stm->bl_version); 
+	if(!stm->dev)
+	{
+		fprintf(stderr, "Device Information not found - check device table in stm8.c\n");
+		return NULL;	
+	}
+
 
 	routine_data = stm8_get_e_w_routine(&routine_len,stm->bl_version);
 
@@ -172,12 +193,12 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	{
 		if(routine_len > 128)
 		{
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&e_w_routine_32k_1_2_data[routine_offset],128))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,routine_data,128))
 				return 0;
 			routine_len-=128;
 			routine_offset+=128;
 		} else {
-			if(!stm8_write_memory(stm, 0xA0 + routine_offset,&e_w_routine_32k_1_2_data[routine_offset],routine_len))
+			if(!stm8_write_memory(stm, 0xA0 + routine_offset,routine_data,routine_len))
 				return 0;
 			routine_len=0;
 		}
