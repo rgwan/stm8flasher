@@ -241,8 +241,8 @@ int main(int argc, char* argv[]) {
 		ssize_t r;
 		unsigned int size = parser->size(p_st);
 
-		//FIXME
-		//size -= 0x8000;
+		// Binaryfiles are put at beginning of Flash (0x8000) - Intel Hexfiles include the correct adress
+		if(parser == &PARSER_HEX) size -= 0x8000;
 
 		if (size > stm->dev->fl_end - stm->dev->fl_start) {
 			fprintf(stderr,"Size: %d Flash-Start: %x Flash-End: %x\n", size, stm->dev->fl_start, stm->dev->fl_end);
