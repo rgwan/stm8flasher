@@ -452,7 +452,7 @@ int parse_options(int argc, char *argv[]) {
 void show_help(char *name) {
 	fprintf(stderr,
 		"Usage: %s [-bvngfhc] [-[rw] filename] /dev/ttyS0\n"
-		"	-b rate		Baud rate (default 57600)\n"
+		"	-b rate		Baud rate (default 115200)\n"
 		"	-r filename	Read flash to file\n"
 		"	-w filename	Write flash to file\n"
 		"	-l		Enable STM8 Bootloader OPTION-Bytes\n"
