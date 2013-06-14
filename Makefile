@@ -20,3 +20,4 @@ clean:
 	rm -f stm8flash
 	rm -f stm8flash.gdb
 
+romfs:
