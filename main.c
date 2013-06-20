@@ -337,7 +337,7 @@ close:
 			usleep(10000); //FIXME	
 		} else if (cpm_reset_flag) {
 			cpm_reset();
-			usleep(10000);		
+			usleep(30000);		
 		} else {		
 			if (stm8_reset_device(stm))
 				fprintf(stdout, "done.\n");
