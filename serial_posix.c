@@ -86,11 +86,6 @@ void serial_dtr_reset(serial_t *h) {
 
 }
 
-void cpm_reset()
-{
-	system("cpm -N STM8_RESET -V 1");
-	system("cpm -N STM8_RESET -V 0");
-}
 
 
 serial_err_t serial_setup(serial_t *h, const serial_baud_t baud, const serial_bits_t bits, const serial_parity_t parity, const serial_stopbit_t stopbit) {

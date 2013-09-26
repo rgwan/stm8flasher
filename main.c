@@ -33,6 +33,11 @@
 #include "stm8.h"
 #include "parser.h"
 
+#ifdef LANTRONIX_CPM
+#include "cp_config.h"
+#include "cp_group.h"
+#endif
+
 #include "parsers/binary.h"
 #include "parsers/hex.h"
 
@@ -67,6 +72,14 @@ char		*filename;
 int  parse_options(int argc, char *argv[]);
 void show_help(char *name);
 
+#ifdef LANTRONIX_CPM
+void cpm_reset()
+{
+	cp_group_data_output("STM8_RESET", 1);
+	cp_group_data_output("STM8_RESET", 0);
+}
+#endif
+
 int isMemZero(uint8_t *data, int len)
 {
 	if(len <= 0) return 0;
@@ -83,6 +96,10 @@ int isMemZero(uint8_t *data, int len)
 int main(int argc, char* argv[]) {
 	int ret = 1;
 	parser_err_t perr;
+#ifdef LANTRONIX_CPM
+	cp_config_init();
+	cp_group_init();
+#endif
 
 	printf("stm8flash based on stm32flash - http://stm32flash.googlecode.com/\n\n");
 	if (parse_options(argc, argv) != 0)
@@ -160,10 +177,12 @@ int main(int argc, char* argv[]) {
 		usleep(10000); //FIXME
 	}
 
+#ifdef LANTRONIX_CPM
 	if(cpm_reset_flag)
 	{
 		cpm_reset();
 	}
+#endif
 
 	printf("Serial Config: %s\n", serial_get_setup_str(serial));
 	if (!(stm = stm8_init(serial, init_flag))) goto close;
@@ -335,9 +354,11 @@ close:
 		{
 			serial_dtr_reset(serial);
 			usleep(10000); //FIXME	
+#ifdef LANTRONIX_CPM
 		} else if (cpm_reset_flag) {
 			cpm_reset();
-			usleep(30000);		
+			usleep(30000);
+#endif		
 		} else {		
 			if (stm8_reset_device(stm))
 				fprintf(stdout, "done.\n");
