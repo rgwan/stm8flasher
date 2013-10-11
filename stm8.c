@@ -52,6 +52,9 @@ const stm8_dev_t devices[] = {
 	{0x0}
 };
 
+
+extern FILE *fp_stderr;
+
 /* internal functions */
 uint8_t stm8_gen_cs(const uint32_t v);
 void    stm8_send_byte(const stm8_t *stm, uint8_t byte);
@@ -95,7 +98,7 @@ char stm8_send_command(const stm8_t *stm, const uint8_t cmd) {
 	stm8_send_byte(stm, cmd);
 	stm8_send_byte(stm, cmd ^ 0xFF);
 	if (stm8_read_byte(stm) != STM8_ACK) {
-		fprintf(stderr, "Error sending command 0x%02x to device\n", cmd);
+		fprintf(fp_stderr, "Error sending command 0x%02x to device\n", cmd);
 		return 0;
 	}
 	return 1;
@@ -149,7 +152,7 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 		stm8_send_byte(stm, STM8_CMD_INIT);
 		if (stm8_read_byte(stm) != STM8_ACK) {
 			stm8_close(stm);
-			fprintf(stderr, "Failed to get init ACK from device\n");
+			fprintf(fp_stderr, "Failed to get init ACK from device\n");
 			return NULL;
 		}
 	}
@@ -164,7 +167,7 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	stm->cmd->wm     = stm8_read_byte(stm); --len;
 	stm->cmd->er     = stm8_read_byte(stm); --len;
 	if (len > 0) {
-		fprintf(stderr, "Seems this bootloader returns more then we understand in the GET command, we will skip the unknown bytes\n");
+		fprintf(fp_stderr, "Seems this bootloader returns more then we understand in the GET command, we will skip the unknown bytes\n");
 		while(len-- > 0) stm8_read_byte(stm);
 	}
 
@@ -178,7 +181,7 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 	stm->dev = stm8_get_device(stm->bl_version); 
 	if(!stm->dev)
 	{
-		fprintf(stderr, "Device Information not found - check device table in stm8.c\n");
+		fprintf(fp_stderr, "Device Information not found - check device table in stm8.c\n");
 		return NULL;	
 	}
 
@@ -187,7 +190,7 @@ stm8_t* stm8_init(const serial_t *serial, const char init) {
 
 	if(!routine_data)
 	{
-		fprintf(stderr, "Erase and Write Routines for Bootloader-Version not found!\n");
+		fprintf(fp_stderr, "Erase and Write Routines for Bootloader-Version not found!\n");
 		return NULL;	
 	}
 

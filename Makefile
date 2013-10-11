@@ -1,7 +1,7 @@
 CC=$(CROSS_COMPILE)gcc
 CFLAGS=-static -g -Wall -fPIC -mcpu=5208 -DLANTRONIX_CPM
 INCLUDES=-I$(ROOTDIR)/include -I$(ROOTDIR)/user/lantronix/libcp -I./parsers -I.
-LDFLAGS=-static -g -fPIC -lparsers -lcp -lm
+LDFLAGS=-static -g -fPIC -lparsers  -lm
 LIBRARIES=-L$(ROOTDIR)/user/lantronix/libcp -L$(ROOTDIR)/lib -L./parsers
 SOURCES=main.c utils.c stm8.c e_w_routines.c serial_common.c serial_platform.c  
 OBJECTS=$(SOURCES:.c=.o)
